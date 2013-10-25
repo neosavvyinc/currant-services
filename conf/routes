@@ -2,8 +2,31 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
+# GAMES
+# FRIENDS
+# CLUBS
+# PROFILE
+# USER
+
 # Home page
 GET     /                           controllers.Application.index
+
+# Games
+GET     /games                      controllers.Games.findAll(location: Option[String])
+GET     /games/:id                  controllers.Games.find(id: Int)
+
+# Friends
+POST    /friends/add                controllers.Friends.add(userId: Int)
+GET     /friends/:userId            controllers.Friends.findAll(userId: Int)
+
+# Clubs
+# ...
+
+# Profile
+# ...
+
+# Users
+GET     /users/:id                  controllers.Users.find(id: Int)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
