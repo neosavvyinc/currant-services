@@ -2,12 +2,6 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-# GAMES
-# FRIENDS
-# CLUBS
-# PROFILE
-# USER
-
 # Home page
 GET     /                           controllers.Application.index
 
