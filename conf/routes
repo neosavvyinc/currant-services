@@ -3,7 +3,182 @@
 # ~~~~
 
 # Home page
-GET     /                           controllers.Application.index
+GET         /                              controllers.Application.index
 
 # Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file               controllers.Assets.at(path="/public", file)
+GET         /assets/*file                  controllers.Assets.at(path="/public", file)
+
+
+# Registration
+
+# Request: {
+#  token: "", //one time token from client so we can calculate the MD5 on serverside to check against validationToken
+#  validationToken: "", //MD5 calculated value from client
+#  payload: {
+#   firstName: "",
+#   lastName: "",
+#   password: "",
+#   email, "",
+#   favoriteTimeToPlay, ""
+#   favoriteSports: [sportId1, sportId2, sportId3] //must be at least 1, no more than 3
+#   facebookId: "" // optional parameter in the case of email registration
+#  }
+# }
+POST        /registration/:id              controllers.User.register()
+
+# Login
+
+# Request: {
+#  token: "",
+#  validationToken: ""
+#}
+GET         /profile/facebook/:id          controllers.Profile.find( facebookId: String )
+
+# Request: {
+#  token: "",
+#  validationToken: ""
+#  payload: {
+#   email: "",
+#   password: ""
+# }
+#}
+POST        /login                         controllers.Authentication.login()
+
+# Push Notifications
+# Request: {
+#  token: "",
+#  validationToken: ""
+#  payload: {
+#   userid: "",
+#   push: {
+#       pushid: "",
+#       platform: "iOS", "Android"
+#   }
+# }
+#}
+POST        /profile/pushIdentifier        controllers.Profile.updatePushIdentifier()
+
+
+# Profile
+# Response: {
+#  token: "",
+#  validationToken: ""
+#  payload: {
+#   user: {
+#       currant_user_id: "", //read only
+#       email_address: "",//read only
+#       account_status: "",//read only
+#       subscriber_type: "",//read only
+#       active: "",//read only
+#   },
+#   profile: {
+#       source: "",//read only
+#       source_identifier: "",//read only ???
+#       first: ""
+#       last: ""
+#       image: ""
+#       bio: ""
+#       city: ""
+#       state: ""
+#       country: ""
+#       profile_level: "",//read only
+#       preferred_time: ""
+#       location_enabled: ""
+#       new_game_notification: ""
+#       friend_activity_notification: ""
+#       news_promotions_notification: ""
+#   },
+#   extendedProfile: {
+#       number_of_clubs: "",//read only
+#       number_of_friends: "",//read only
+#       number_of_checkins: "",//read only
+#       number_of_games_joined: "",//read only
+#       number_of_games_created: "",//read only
+#       number_of_games_saved: "",//read only
+#   }
+# }
+#}
+PUT         /profile/:id                   controllers.Profile.update()
+
+# Response: {
+#  token: "",
+#  validationToken: ""
+#  payload: {
+#   user: {
+#       currant_user_id: "", //read only
+#       email_address
+#       status
+#       subscriber_type
+#       active
+#   },
+#   profile: {
+#       source: ""
+#       source_identifier: ""
+#       first: ""
+#       last: ""
+#       image: ""
+#       bio: ""
+#       city: ""
+#       state: ""
+#       country: ""
+#       profile_level: ""
+#       preferred_time: ""
+#       location_enabled: ""
+#       new_game_notification: ""
+#       friend_activity_notification: ""
+#       news_promotions_notification: ""
+#   },
+#   extendedProfile: {
+#       number_of_clubs: "",
+#       number_of_friends: "",
+#       number_of_checkins: "",
+#       number_of_games_joined: "",
+#       number_of_games_created: "",
+#       number_of_games_saved: "",
+#   }
+# }
+#}
+GET         /profile/:id                   controllers.Profile.find()
+
+# Response: {
+#  token: "",
+#  validationToken: ""
+#  payload: {
+#   user: {
+#       currant_user_id: "", //read only
+#       email_address
+#       status
+#       subscriber_type
+#       active
+#   },
+#   extendedProfile: {
+#       number_of_clubs: "",
+#       number_of_friends: "",
+#       number_of_checkins: "",
+#       number_of_games_joined: "",
+#       number_of_games_created: "",
+#       number_of_games_saved: "",
+#   }
+# }
+#}
+GET         /profile/extended/:id          controllers.Profile.findExtended()
+
+
+
+
+
+# Returns list of games
+# Response: {
+#   token: "",
+#   validationToken: "",
+#   payload: {
+#       games: [
+#           {
+#                //game object tbd
+#           }
+#       ]
+#   }
+# }
+# :type can be "saved", "joined", "created" - if type not provided - return all
+# :currantProfileId is a valid currant profile id
+GET         /games/:currantProfileId/:type  controllers.Game.find()
