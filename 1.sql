@@ -146,6 +146,7 @@ CREATE TABLE GAME (
   club_id BIGINT,
   location VARCHAR(100), /* TODO: Make this consistent with other Location data fields*/
   gps_coordinates VARCHAR(50), /* TODO: use the Postgresql datatype */
+  venue_id BIGINT, //TODO: Save the venue reference
   byof BOOLEAN NOT NULL,
   game_time TIMESTAMP NOT NULL,
   size INT NOT NULL,
@@ -159,7 +160,8 @@ CREATE TABLE GAME (
 CREATE TABLE GAME_PROFILE_CONNECTION (
   game_id BIGINT NOT NULL,
   profile_id BIGINT NOT NULL,
-  status VARCHAR(10) NOT NULL, /*creator, invited, accepted, blocked, */
+  status VARCHAR(10) NOT NULL, /*creator, invited, accepted, blocked, bookmarked, left, declined */
+  source VARCHAR(10), /* Helps us determine how the user found the game, via invite, search, shared*/
   /* TODO: Figure out how to handle the wait list connection here for game/profiles */
   /* add a default strategy of Blast all users but introduce ability to override this later*/
   FOREIGN KEY (game_id) REFERENCES GAME(game_id),

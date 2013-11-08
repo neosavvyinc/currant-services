@@ -3,10 +3,10 @@
 # ~~~~
 
 # Home page
-GET         /                              controllers.Application.index
+GET           /                                                                   controllers.Application.index
 
 # Map static resources from the /public folder to the /assets URL path
-GET         /assets/*file                  controllers.Assets.at(path="/public", file)
+GET           /assets/*file                                                       controllers.Assets.at(path="/public", file)
 
 
 # Registration
@@ -24,7 +24,7 @@ GET         /assets/*file                  controllers.Assets.at(path="/public",
 #   facebookId: "" // optional parameter in the case of email registration
 #  }
 # }
-POST        /registration/:id              controllers.User.register()
+POST          /registration/:id                                                   controllers.User.register()
 
 # Login
 
@@ -32,7 +32,7 @@ POST        /registration/:id              controllers.User.register()
 #  token: "",
 #  validationToken: ""
 #}
-GET         /profile/facebook/:id          controllers.Profile.find( facebookId: String )
+GET           /profile/facebook/:id                                               controllers.Profile.find( facebookId: String )
 
 # Request: {
 #  token: "",
@@ -42,7 +42,7 @@ GET         /profile/facebook/:id          controllers.Profile.find( facebookId:
 #   password: ""
 # }
 #}
-POST        /login                         controllers.Authentication.login()
+POST          /login                                                              controllers.Authentication.login()
 
 # Push Notifications
 # Request: {
@@ -56,7 +56,7 @@ POST        /login                         controllers.Authentication.login()
 #   }
 # }
 #}
-POST        /profile/pushIdentifier        controllers.Profile.updatePushIdentifier()
+POST          /profile/pushIdentifier                                             controllers.Profile.updatePushIdentifier()
 
 
 # Profile
@@ -98,7 +98,7 @@ POST        /profile/pushIdentifier        controllers.Profile.updatePushIdentif
 #   }
 # }
 #}
-PUT         /profile/:id                   controllers.Profile.update()
+PUT           /profile/:id                                                        controllers.Profile.update()
 
 # Response: {
 #  token: "",
@@ -138,7 +138,7 @@ PUT         /profile/:id                   controllers.Profile.update()
 #   }
 # }
 #}
-GET         /profile/:id                   controllers.Profile.find()
+GET           /profile/:id                                                        controllers.Profile.find()
 
 # Response: {
 #  token: "",
@@ -161,7 +161,7 @@ GET         /profile/:id                   controllers.Profile.find()
 #   }
 # }
 #}
-GET         /profile/extended/:id          controllers.Profile.findExtended()
+GET           /profile/extended/:id                                               controllers.Profile.findExtended()
 
 
 
@@ -169,8 +169,6 @@ GET         /profile/extended/:id          controllers.Profile.findExtended()
 
 # Returns list of games
 # Response: {
-#   token: "",
-#   validationToken: "",
 #   payload: {
 #       games: [
 #           {
@@ -181,4 +179,229 @@ GET         /profile/extended/:id          controllers.Profile.findExtended()
 # }
 # :type can be "saved", "joined", "created" - if type not provided - return all
 # :currantProfileId is a valid currant profile id
-GET         /games/:currantProfileId/:type  controllers.Game.find()
+GET           /games/:currantProfileId/:type                                      controllers.Game.find()
+
+
+
+# Returns list of games
+# Response: {
+#   errorCode: 0, //anything other than 0 is no good
+#   errorMessage: "This is the technical error from try/catch",
+#   displayErrorMessage: "This is the pretty user displayed message",
+#   payload: {
+#       friends: [
+#           {
+#               //list of friends that match type
+#           }
+#       ]
+#   }
+# }
+
+# :type can be "accepted", "invited", "pending", or "blocked"
+POST          /friend/:currantProfileId/:type                                     controllers.Friend.find()
+
+# Performs an action on a group of friends
+# Response: {
+#   errorCode: 0, //anything other than 0 is no good
+#   errorMessage: "This is the technical error from try/catch",
+#   displayErrorMessage: "This is the pretty user displayed message",
+#   payload: {
+#       friends: [
+#           {
+#               //list of friends to perform action on
+#           }
+#       ]
+#   }
+# }
+# :action can be any one of "add", "remove", or "block"
+POST          /friend/:action                                                     controllers.Friend.update()
+
+
+
+
+
+# Finds a list of all sports
+#
+# :token is the token for authentication calculated by client
+# :validationToken is the token used to calculate token when combined with shared secret
+GET           /game/sports/:token/:validationToken                                controllers.Game.findSports()
+
+
+# Finds a list of all clubs for a user
+#
+# :token is the token for authentication calculated by client
+# :validationToken is the token used to calculate token when combined with shared secret
+# :currantProfileId is the user for whom you are requesting the clubs they are a member
+GET           /game/club/:currantProfileId/:token/:validationToken/               controllers.Game.findClubsForMember()
+
+
+
+
+# Request: {
+#  token: "",
+#  validationToken: ""
+#  payload: {
+#   currant_profile_id: "",
+#   sport_id: "",
+#   visibility: "",
+#   club_id: "", //takes precendence over friend list if both provided - friends are ignored
+#   location: {
+#       foursquare_venue_id: "",
+#       name: "",
+#       latitude: "",
+#       longitude: "",
+#       address: ""
+#       address1: ""
+#       zip: "",
+#       city: "",
+#       state: "",
+#       country: "",
+#       phoneNumber: ""
+#   },
+#   schedule: {
+#       date: "", //standard unix format
+#       repeating: "", // boolean for every week (1) or once (0)
+#   }
+#   inviteList: {
+#       currantUsers: [
+#           // list of friend's currant profile ids
+#       ],
+#       emailUsers: [
+#           // list of email address to kick off the invite process via email
+#       ],
+#       facebookUsers: [
+#           // list of facebook users to invite to the game
+#           // if user is already in the system add an invite
+#           // if user is not already a currant user then add them and send invite
+#       ]
+#   },
+#   gameDefinition: {
+#       players: {
+#           min: "",
+#           max: ""
+#       },
+#       intensity: "",
+#       equipment: [
+#           {
+#               equipment_id: "",
+#               amount: ""
+#           }
+#       ]
+#   }
+# }
+#}
+POST          /game/new                                                           controllers.Game.create()
+PUT           /game/:id                                                           controllers.Game.update()
+PUT           /game/delta/:id                                                     controllers.Game.updateDelta() //optional for later to improve performance
+DELETE        /game/:id/:token/:validationToken                                   controllers.Game.delete()
+
+
+# Returns information on the number of players in a game (and their information)
+GET           /game/:gameId/players
+
+
+# Request: {
+#  token: "",
+#  validationToken: ""
+#  payload: {
+#   players: {
+#       currantUsers: [
+#           // list of friend's currant profile ids
+#       ]
+#   }
+# }
+# :action remove
+POST          /game/:gameId/players/:token/:validationToken
+
+# This saves custom equipment relevant only to the game_id provided
+#
+# Request: {
+#  token: "",
+#  validationToken: ""
+#  payload: {
+#       name: "",
+#       game_id: ""
+#   }
+#}
+POST          /game/equipment/new                                                 controllers.Game.createEquipment()
+
+# Search Games
+GET           /game/:type/:token/:validationToken                                 controllers.Game.findGames( lat: Float, long: Float, sportId: Float, visibility: String )
+
+# We have moved this to the /club service below - see /club/:clubId/matches
+# GET           /game/club/:clubId/:token/:validationToken                          controllers.Game.findGamesForClubId()
+
+# Adds a row to the GAME_PROFILE_CONNECTION with
+# Todo: maybe redo this api call to simplify for save, leave, and join a game for one user
+POST          /game/:gameId/:status/:currantUserId/:token/:validationToken        controllers.Game.updateGameProfileConnection()
+
+
+# Request: {
+#  token: "",
+#  validationToken: ""
+#  payload: {
+#   name: "",
+#   description: "",
+#   sport_id: "",
+#   location: {
+#       latitude: "",
+#       longitude: "",
+#       city: "",
+#       state: ""
+#   },
+#   security: {
+#       visibility: "",
+#       approveMembers: "",
+#       friendsOfFriends: ""
+#   },
+#   photos: [
+#       //collection of urls
+#   ],
+#   icon: {
+#       frontColor: "",
+#       backColor: "",
+#       iconId: "",
+#   },
+#   inviteList: {
+#       currantUsers: [
+#           // list of friend's currant profile ids
+#       ],
+#       emailUsers: [
+#           // list of email address to kick off the invite process via email
+#       ],
+#       facebookUsers: [
+#           // list of facebook users to invite to the game
+#           // if user is already in the system add an invite
+#           // if user is not already a currant user then add them and send invite
+#       ]
+#   }
+# }
+#}
+POST          /club/new                                                           controllers.Club.create()
+GET           /club/:clubId/members                                               controllers.Club.findMembers()
+GET           /club/:clubId                                                       controllers.Club.findClubInfo()
+
+# matchType is future, past, all
+GET           /club/:clubId/matches                                               controllers.Club.findMatches( matchType : String )
+
+
+
+
+GET           /profile/:currantUserId/clubs                                       controllers.Profile.findClubs()
+
+GET           /profile/:currantUserId/clubs/explore                               controllers.Profile.exploreClubs()
+
+
+# Request: {
+#  token: "",
+#  validationToken: ""
+#  payload: {
+#   club_id: "",
+#  }
+# }
+POST          /profile/:currantUserId/club/join                                   controllers.Profile.joinClub()
+DELETE        /profile/:currantUserId/club/:clubId/leave                          controllers.Profile.leaveClub()
+
+
+
+
