@@ -138,7 +138,7 @@ PUT           /profiles/:id                                                     
 #   }
 # }
 #}
-GET           /profiles/:id                                                        controllers.Profiles.find(id: Int)
+GET           /profiles/:id                                                        controllers.Profiles.find(id: Float)
 
 # Response: {
 #  token: "",
@@ -163,7 +163,7 @@ GET           /profiles/:id                                                     
 #}
 
 # ?query params for extended?
-GET           /profiles/:id/extended                                               controllers.Profiles.findExtended(id: Int)
+GET           /profiles/:id/extended                                               controllers.Profiles.findExtended(id: Float)
 
 
 
@@ -202,7 +202,7 @@ GET           /games                                                            
 
 # :type can be "accepted", "invited", "pending", or "blocked"
 #POST          /friends/:currantProfileId/:type                                     controllers.Friend.find()
-#GET           /friends/:currantProfileId                                            controllers.Friend.find(currantProfileId: Int, type: String)
+#GET           /friends/:currantProfileId                                            controllers.Friend.find(currantProfileId: Float, type: String)
 
 # Performs an action on a group of friends
 # Response: {
@@ -231,9 +231,9 @@ GET           /games                                                            
 # :validationToken is the token used to calculate token when combined with shared secret
 #GET           /games/sports/:token/:validationToken                                controllers.Game.findSports()
 #
-# @adam, I know you don't like having this as a route if there's only one controller method, but it's table in the database...
+# CC: @adam, I know you don't like having this as a route if there's only one controller method right now, but I think this deserves a route
 # we'll (probably) eventually want to have some way to add/deactivate/update sports, even if it's just a Currant-curated admin action
-# my vote is for this, but we can discuss, obviously
+# my vote is for this, but we should discuss, obviously
 GET           /sports                                                               controllers.Sports.findAll()
 
 
@@ -301,13 +301,13 @@ GET           /sports                                                           
 # }
 #}
 POST          /games/new                                                           controllers.Games.create()
-PUT           /games/:id                                                           controllers.Games.update(id: Int)
-PUT           /games/:id/delta/                                                    controllers.Games.updateDelta(id: Int) //optional for later to improve performance
-DELETE        /games/:id/:token/:validationToken                                   controllers.Games.delete(id: Int)
+PUT           /games/:id                                                           controllers.Games.update(id: Float)
+PUT           /games/:id/delta/                                                    controllers.Games.updateDelta(id: Float) //optional for later to improve performance
+DELETE        /games/:id/:token/:validationToken                                   controllers.Games.delete(id: Float)
 
 
 # Returns information on the number of players in a game (and their information)
-GET           /games/:id/players                                                   controllers.Games.findPlayers(id: Int)
+GET           /games/:id/players                                                   controllers.Games.findPlayers(id: Float)
 
 
 # Request: {
@@ -320,8 +320,8 @@ GET           /games/:id/players                                                
 #       ]
 #   }
 # }
-# pass a collection of players w/ actions in request body
-POST          /games/:gameId/players/:token/:validationToken                        controllers.Games.updatePlayers()
+# CC: pass a collection of players w/ actions in request body
+POST          /games/:gameId/players/:token/:validationToken                        controllers.Games.updatePlayers(gameId: Float)
 
 # This saves custom equipment relevant only to the game_id provided
 #
@@ -335,7 +335,7 @@ POST          /games/:gameId/players/:token/:validationToken                    
 #}
 POST          /games/:gameId/equipment/new                                                 controllers.Games.createEquipment()
 #
-# Probably additional routes to remove/update equipment associated with a game here as well??
+# CC: Probably additional routes to remove/update equipment associated with a game here as well??
 #
 
 # Search Games
@@ -400,7 +400,6 @@ GET           /clubs/:clubId                                                    
 # CC: is a 'Game' and a 'Match' the same thing? we should probably stick to one term, doesn't really matter which, as long as we're consistent
 GET           /clubs/:clubId/matches                                               controllers.Clubs.findMatches( matchType : String )
 
-
 GET           /profiles/:currantUserId/clubs                                       controllers.Profiles.findClubs()
 
 GET           /profiles/:currantUserId/clubs/explore                               controllers.Profiles.exploreClubs()
@@ -439,7 +438,7 @@ POST          /profiles/:id/clubs                                               
 # }
 
 # :friendStatus can be "accepted", "invited", "pending", or "blocked"
-GET          /profiles/:currantUserId/friends                                       controllers.Profiles.findFriends(currantUserId: Int, friendStatus: String)
+GET          /profiles/:currantUserId/friends                                       controllers.Profiles.findFriends(currantUserId: Float, friendStatus: String)
 
 # Performs an action on a group of friends
 # Response: {
@@ -457,7 +456,7 @@ GET          /profiles/:currantUserId/friends                                   
 #   }
 # }
 # "add", "remove", or "block", include collection of friends (with name and action to take) in request body
-POST        /profiles/:currantUserId/friends/                                    controllers.Profiles.updateFriends(currantUserId: Int)
+POST        /profiles/:currantUserId/friends/                                    controllers.Profiles.updateFriends(currantUserId: Float)
 
 # Adds a row to the GAME_PROFILE_CONNECTION with
 # Todo: maybe redo this api call to simplify for save, leave, and join a game for one user
@@ -465,8 +464,14 @@ POST        /profiles/:currantUserId/friends/                                   
 # CC: I also see this as an entity nested under profile because you want to know about a game for a given specific user
 # join, leave, save a game, etc.
 #POST          /games/:gameId/:status/:currantUserId/:token/:validationToken        controllers.Game.updateGameProfileConnection()
-GET         /profiles/:id/games                                                     controllers.Profiles.findAllGames(id: Int, location: /* other query/filter params */)
+GET         /profiles/:id/games                                                     controllers.Profiles.findAllGames(id: Float, location: /* other query/filter params */)
 
 # CC: join/save/leave a game, include list of games and actions and update accordingly. if the action is 'leave', just remove that game from the collection
-POST        /profiles/:id/games                                                     controllers.Profiles.updateGames(id: Int)
+POST        /profiles/:id/games                                                     controllers.Profiles.updateGames(id: Float)
+
+# TO DO
+# group like-resource routes
+# determine correct datatype for Id's
+# id for route vs. verbose id names?
+# resource/controller plurality, Model singular
 
