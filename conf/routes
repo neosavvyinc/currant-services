@@ -32,7 +32,7 @@ POST          /registration/:id                                                 
 #  token: "",
 #  validationToken: ""
 #}
-GET           /profile/facebook/:id                                               controllers.Profile.find( facebookId: String )
+GET           /profiles/facebook/:id                                               controllers.Profiles.find( facebookId: String )
 
 # Request: {
 #  token: "",
@@ -56,7 +56,7 @@ POST          /login                                                            
 #   }
 # }
 #}
-POST          /profile/pushIdentifier                                             controllers.Profile.updatePushIdentifier()
+POST          /profiles/pushIdentifier                                             controllers.Profiles.updatePushIdentifier()
 
 
 # Profile
@@ -98,7 +98,7 @@ POST          /profile/pushIdentifier                                           
 #   }
 # }
 #}
-PUT           /profile/:id                                                        controllers.Profile.update()
+PUT           /profiles/:id                                                        controllers.Profiles.update()
 
 # Response: {
 #  token: "",
@@ -138,7 +138,7 @@ PUT           /profile/:id                                                      
 #   }
 # }
 #}
-GET           /profile/:id                                                        controllers.Profile.find()
+GET           /profiles/:id                                                        controllers.Profiles.find(id: Int)
 
 # Response: {
 #  token: "",
@@ -161,13 +161,15 @@ GET           /profile/:id                                                      
 #   }
 # }
 #}
-GET           /profile/extended/:id                                               controllers.Profile.findExtended()
+
+# ?query params for extended?
+GET           /profiles/:id/extended                                               controllers.Profiles.findExtended(id: Int)
 
 
 
 
 
-# Returns list of games
+# Returns list of games (all)
 # Response: {
 #   payload: {
 #       games: [
@@ -178,12 +180,13 @@ GET           /profile/extended/:id                                             
 #   }
 # }
 # :type can be "saved", "joined", "created" - if type not provided - return all
-# :currantProfileId is a valid currant profile id
-GET           /games/:currantProfileId/:type                                      controllers.Game.find()
+GET           /games                                                               controllers.Games.find(type: String, location: /* etc. other query/filter params */)
 
 
+#==================================================
+# friends API moved/nested under profiles, see below
 
-# Returns list of games
+# Returns list of friends
 # Response: {
 #   errorCode: 0, //anything other than 0 is no good
 #   errorMessage: "This is the technical error from try/catch",
@@ -198,7 +201,8 @@ GET           /games/:currantProfileId/:type                                    
 # }
 
 # :type can be "accepted", "invited", "pending", or "blocked"
-POST          /friend/:currantProfileId/:type                                     controllers.Friend.find()
+#POST          /friends/:currantProfileId/:type                                     controllers.Friend.find()
+#GET           /friends/:currantProfileId                                            controllers.Friend.find(currantProfileId: Int, type: String)
 
 # Performs an action on a group of friends
 # Response: {
@@ -214,8 +218,9 @@ POST          /friend/:currantProfileId/:type                                   
 #   }
 # }
 # :action can be any one of "add", "remove", or "block"
-POST          /friend/:action                                                     controllers.Friend.update()
+#POST          /friends/:action                                                     controllers.Friend.update()
 
+#==================================================
 
 
 
@@ -224,7 +229,12 @@ POST          /friend/:action                                                   
 #
 # :token is the token for authentication calculated by client
 # :validationToken is the token used to calculate token when combined with shared secret
-GET           /game/sports/:token/:validationToken                                controllers.Game.findSports()
+#GET           /games/sports/:token/:validationToken                                controllers.Game.findSports()
+#
+# @adam, I know you don't like having this as a route if there's only one controller method, but it's table in the database...
+# we'll (probably) eventually want to have some way to add/deactivate/update sports, even if it's just a Currant-curated admin action
+# my vote is for this, but we can discuss, obviously
+GET           /sports                                                               controllers.Sports.findAll()
 
 
 # Finds a list of all clubs for a user
@@ -232,7 +242,7 @@ GET           /game/sports/:token/:validationToken                              
 # :token is the token for authentication calculated by client
 # :validationToken is the token used to calculate token when combined with shared secret
 # :currantProfileId is the user for whom you are requesting the clubs they are a member
-GET           /game/club/:currantProfileId/:token/:validationToken/               controllers.Game.findClubsForMember()
+#GET           /games/clubs/:currantProfileId/:token/:validationToken/               controllers.Game.findClubsForMember()
 
 
 
@@ -290,14 +300,14 @@ GET           /game/club/:currantProfileId/:token/:validationToken/             
 #   }
 # }
 #}
-POST          /game/new                                                           controllers.Game.create()
-PUT           /game/:id                                                           controllers.Game.update()
-PUT           /game/delta/:id                                                     controllers.Game.updateDelta() //optional for later to improve performance
-DELETE        /game/:id/:token/:validationToken                                   controllers.Game.delete()
+POST          /games/new                                                           controllers.Games.create()
+PUT           /games/:id                                                           controllers.Games.update(id: Int)
+PUT           /games/:id/delta/                                                    controllers.Games.updateDelta(id: Int) //optional for later to improve performance
+DELETE        /games/:id/:token/:validationToken                                   controllers.Games.delete(id: Int)
 
 
 # Returns information on the number of players in a game (and their information)
-GET           /game/:gameId/players
+GET           /games/:id/players                                                   controllers.Games.findPlayers(id: Int)
 
 
 # Request: {
@@ -310,8 +320,8 @@ GET           /game/:gameId/players
 #       ]
 #   }
 # }
-# :action remove
-POST          /game/:gameId/players/:token/:validationToken
+# pass a collection of players w/ actions in request body
+POST          /games/:gameId/players/:token/:validationToken                        controllers.Games.updatePlayers()
 
 # This saves custom equipment relevant only to the game_id provided
 #
@@ -320,20 +330,25 @@ POST          /game/:gameId/players/:token/:validationToken
 #  validationToken: ""
 #  payload: {
 #       name: "",
-#       game_id: ""
+#       quantity: "", etc.
 #   }
 #}
-POST          /game/equipment/new                                                 controllers.Game.createEquipment()
+POST          /games/:gameId/equipment/new                                                 controllers.Games.createEquipment()
+#
+# Probably additional routes to remove/update equipment associated with a game here as well??
+#
 
 # Search Games
-GET           /game/:type/:token/:validationToken                                 controllers.Game.findGames( lat: Float, long: Float, sportId: Float, visibility: String )
+GET           /games/:type/:token/:validationToken                                 controllers.Games.findGames( lat: Float, long: Float, sportId: Float, visibility: String )
 
-# We have moved this to the /club service below - see /club/:clubId/matches
-# GET           /game/club/:clubId/:token/:validationToken                          controllers.Game.findGamesForClubId()
+# We have moved this to the /club service below - see /clubs/:clubId/matches
+# GET           /games/clubs/:clubId/:token/:validationToken                          controllers.Game.findGamesForClubId()
 
 # Adds a row to the GAME_PROFILE_CONNECTION with
 # Todo: maybe redo this api call to simplify for save, leave, and join a game for one user
-POST          /game/:gameId/:status/:currantUserId/:token/:validationToken        controllers.Game.updateGameProfileConnection()
+#
+# I also see this as an entity nested under profile. you want to know about a game for a specific user
+#POST          /games/:gameId/:status/:currantUserId/:token/:validationToken        controllers.Game.updateGameProfileConnection()
 
 
 # Request: {
@@ -377,19 +392,18 @@ POST          /game/:gameId/:status/:currantUserId/:token/:validationToken      
 #   }
 # }
 #}
-POST          /club/new                                                           controllers.Club.create()
-GET           /club/:clubId/members                                               controllers.Club.findMembers()
-GET           /club/:clubId                                                       controllers.Club.findClubInfo()
+POST          /clubs/new                                                           controllers.Clubs.create()
+GET           /clubs/:clubId/members                                               controllers.Clubs.findMembers()
+GET           /clubs/:clubId                                                       controllers.Clubs.findClubInfo()
 
 # matchType is future, past, all
-GET           /club/:clubId/matches                                               controllers.Club.findMatches( matchType : String )
+# CC: is a 'Game' and a 'Match' the same thing? we should probably stick to one term, doesn't really matter which, as long as we're consistent
+GET           /clubs/:clubId/matches                                               controllers.Clubs.findMatches( matchType : String )
 
 
+GET           /profiles/:currantUserId/clubs                                       controllers.Profiles.findClubs()
 
-
-GET           /profile/:currantUserId/clubs                                       controllers.Profile.findClubs()
-
-GET           /profile/:currantUserId/clubs/explore                               controllers.Profile.exploreClubs()
+GET           /profiles/:currantUserId/clubs/explore                               controllers.Profiles.exploreClubs()
 
 
 # Request: {
@@ -399,9 +413,60 @@ GET           /profile/:currantUserId/clubs/explore                             
 #   club_id: "",
 #  }
 # }
-POST          /profile/:currantUserId/club/join                                   controllers.Profile.joinClub()
-DELETE        /profile/:currantUserId/club/:clubId/leave                          controllers.Profile.leaveClub()
+#POST          /profiles/:currantUserId/clubs/join                                   controllers.Profiles.joinClub()
 
+# CC: will a user ever be joining multiple clubs at once/in the same request? for these nested resources, we could just assume that adding/updating
+# multiple entities is possible (a la friends) and the following (instead of above /clubs/join route) and pass in a list of clubs (with actions to take).
+# The more I think about it, I think the DELETE method on a nested resource like this is gonnna end up feeling awkward. 
+POST          /profiles/:id/clubs                                                   controllers.Profiles.updateClubs()
+#DELETE        /profiles/:currantUserId/clubs/:clubId/leave                          controllers.Profiles.leaveClub()
 
+# CC: 'friends' routes moved here, under profile. as I see it, the concept of a 'friend' doesn't really exist out of the context of a user/profile,
+# so why not have this nested under profiles?
 
+# Returns list of friends
+# Response: {
+#   errorCode: 0, //anything other than 0 is no good
+#   errorMessage: "This is the technical error from try/catch",
+#   displayErrorMessage: "This is the pretty user displayed message",
+#   payload: {
+#       friends: [
+#           {
+#               //list of friends that match type
+#           }
+#       ]
+#   }
+# }
+
+# :friendStatus can be "accepted", "invited", "pending", or "blocked"
+GET          /profiles/:currantUserId/friends                                       controllers.Profiles.findFriends(currantUserId: Int, friendStatus: String)
+
+# Performs an action on a group of friends
+# Response: {
+#   errorCode: 0, //anything other than 0 is no good
+#   errorMessage: "This is the technical error from try/catch",
+#   displayErrorMessage: "This is the pretty user displayed message",
+#   payload: {
+#       friends: [
+#           {
+#               // list of friends, with an action to perform on each
+#               // if a friend already exists and is not included in this list (i.e. he/she is not being updated)
+#               // then no action is taken
+#           }
+#       ]
+#   }
+# }
+# "add", "remove", or "block", include collection of friends (with name and action to take) in request body
+POST        /profiles/:currantUserId/friends/                                    controllers.Profiles.updateFriends(currantUserId: Int)
+
+# Adds a row to the GAME_PROFILE_CONNECTION with
+# Todo: maybe redo this api call to simplify for save, leave, and join a game for one user
+#
+# CC: I also see this as an entity nested under profile because you want to know about a game for a given specific user
+# join, leave, save a game, etc.
+#POST          /games/:gameId/:status/:currantUserId/:token/:validationToken        controllers.Game.updateGameProfileConnection()
+GET         /profiles/:id/games                                                     controllers.Profiles.findAllGames(id: Int, location: /* other query/filter params */)
+
+# CC: join/save/leave a game, include list of games and actions and update accordingly. if the action is 'leave', just remove that game from the collection
+POST        /profiles/:id/games                                                     controllers.Profiles.updateGames(id: Int)
 
